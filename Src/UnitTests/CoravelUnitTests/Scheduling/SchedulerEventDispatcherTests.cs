@@ -15,7 +15,7 @@ namespace CoravelUnitTests.Scheduling
     public class SchedulerEventDispatcherTests
     {
         [Fact]
-        public async Task<bool> DoesNotThrowOnNullDispatcher()
+        public async Task DoesNotThrowOnNullDispatcher()
         {
             var scheduler = new Scheduler(new InMemoryMutex(), new ServiceScopeFactoryStub(), null);
             bool dummy = true;
@@ -27,19 +27,20 @@ namespace CoravelUnitTests.Scheduling
             await scheduler.RunAtAsync(DateTime.Parse("2018/06/08"));
             await scheduler.RunAtAsync(DateTime.Parse("2018/06/09"));
 
-            // Should not throw due to null Dispatcher
-            return dummy;
+            // Assert that dummy remains true, indicating the scheduled actions didn't throw exceptions
+            Assert.True(dummy);
         }
 
+
         [Fact]
-        public async Task<bool> SchedulerDispatchesEvents(){
+        public async Task SchedulerDispatchesEvents()
+        {
             var services = new ServiceCollection();
             services.AddEvents();
             services.AddTransient<ScheduledEventStartedListener>();
             var provider = services.BuildServiceProvider();
 
             IEventRegistration registration = provider.ConfigureEvents();
-            
             registration
                 .Register<ScheduledEventStarted>()
                 .Subscribe<ScheduledEventStartedListener>();
@@ -50,11 +51,14 @@ namespace CoravelUnitTests.Scheduling
             scheduler.Schedule(() => dummy = true)
             .EveryMinute();
 
-            await scheduler.RunAtAsync(DateTime.Parse("2018/06/07"));  
+            await scheduler.RunAtAsync(DateTime.Parse("2018/06/07"));
 
-            Assert.True(ScheduledEventStartedListener.Ran);    
+            // Assert that the ScheduledEventStartedListener has been triggered
+            Assert.True(ScheduledEventStartedListener.Ran);
 
-            return dummy; // Avoids "unused variable" warning ;)      
+            // Optionally, verify the dummy variable's state if it's relevant to the test's intention
+            Assert.True(dummy);
         }
+
     }
 }

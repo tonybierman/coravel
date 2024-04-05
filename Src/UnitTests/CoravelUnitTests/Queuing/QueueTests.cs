@@ -78,7 +78,7 @@ namespace CoravelUnitTests.Queuing
         }
 
         [Fact]
-        public async Task<int> DoesNotThrowOnNullDispatcher()
+        public async Task DoesNotThrowOnNullDispatcher()
         {
             int successfulTasks = 0;
 
@@ -90,27 +90,24 @@ namespace CoravelUnitTests.Queuing
             await queue.ConsumeQueueAsync();
             // Should not throw due to null Dispatcher
 
-            return successfulTasks;
+            Assert.Equal(3, successfulTasks); // Add an assertion to check if the tasks were successful
         }
 
-        [Fact]
-        public async Task<int> QueueDispatchesInternalEvents()
-        {
 
+        [Fact]
+        public async Task QueueDispatchesInternalEvents()
+        {
             var services = new ServiceCollection();
             services.AddEvents();
             services.AddTransient<QueueConsumationStartedListener>();
             var provider = services.BuildServiceProvider();
 
             IEventRegistration registration = provider.ConfigureEvents();
-
             registration
                 .Register<QueueConsumationStarted>()
                 .Subscribe<QueueConsumationStartedListener>();
 
-
             int successfulTasks = 0;
-
             Queue queue = new Queue(provider.GetService<IServiceScopeFactory>(), provider.GetService<IDispatcher>());
             queue.QueueTask(() => successfulTasks++);
             queue.QueueTask(() => successfulTasks++);
@@ -119,22 +116,9 @@ namespace CoravelUnitTests.Queuing
             await queue.ConsumeQueueAsync();
             // Should not throw due to null Dispatcher
 
-
-            Assert.True(QueueConsumationStartedListener.Ran);
-
-            return successfulTasks; // Avoids "unused variable" warning ;)     
+            Assert.True(QueueConsumationStartedListener.Ran); // Verifies the listener ran as expected
+            Assert.Equal(3, successfulTasks); // Asserts that all tasks were successfully executed
         }
 
-        private class TestInvocable : IInvocable
-        {
-            private Action _func;
-
-            public TestInvocable(Action func) => this._func = func;
-            public Task Invoke()
-            {
-                this._func();
-                return Task.CompletedTask;
-            }
-        }
     }
 }
