@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,9 +11,16 @@ namespace Coravel.Mailer.Mail.Mailers
 {
     public class FileLogMailer : IMailer
     {
-        private static readonly string FilePath = "mail.log";
         private RazorRenderer _renderer;
         private MailRecipient _globalFrom;
+
+        public string FilePath
+        {
+            get
+            {
+                return $"mail-{DateTime.UtcNow.Ticks}.log";
+            }
+        }
 
         public FileLogMailer(RazorRenderer renderer, MailRecipient globalFrom)
         {
@@ -31,7 +39,7 @@ namespace Coravel.Mailer.Mail.Mailers
         {
             from = this._globalFrom ?? from;
 
-            using (var writer = File.CreateText(FilePath))
+            using (var writer = File.CreateText(string.Format(FilePath)))
             {
                 await writer.WriteAsync($@"
 ---------------------------------------------
