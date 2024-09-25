@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <AddRazorSupportForMvc>True</AddRazorSupportForMvc>
     <PackageId>Coravel.Mailer</PackageId>
-    <Version>5.0.1</Version>
+    <Version>5.0.1.1</Version>
     <Authors>James Hickey</Authors>
     <Company>-</Company>
     <Title>Coravel.Mailer</Title>
